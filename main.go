@@ -45,12 +45,13 @@ twtxt2html converts a twtxt feed to a static HTMl page
 		  <article id="{{ $twt.Hash }}" class="h-entry">
 			<div class="u-author h-card">
 			  <div class="dt-publish">
-				<a class="u-url" href="https://search.twtxt.net/twt/{{ $twt.Hash }}">
+				<a class="u-url" href="#{{ $twt.Hash }}">
 				  <time class="dt-published" datetime="{{ $twt.Created | date "2006-01-02T15:04:05Z07:00" }}">
 					{{ $twt.Created }}
 				  </time>
 				</a>
 				<span>&nbsp;({{ $twt.Created | time }})</span>
+				<a class="u-search" href="https://search.twtxt.net/twt/{{ $twt.Hash }}">(search)</a>
 			  </div>
 			</div>
 			<div class="e-content">
