@@ -27,7 +27,7 @@ import (
 
 const (
 	helpText = `
-twtxt2html converts a twtxt feed to a static HTMl page
+twtxt2html converts a twtxt feed to a static HTML page
 `
 
 	htmlTemplate = `

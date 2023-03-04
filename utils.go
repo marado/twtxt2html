@@ -1,16 +1,18 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"html/template"
 	"math"
 	"time"
 
 	"github.com/dustin/go-humanize"
-	"github.com/gomarkdown/markdown"
-	"github.com/gomarkdown/markdown/html"
-	"github.com/gomarkdown/markdown/parser"
 	"github.com/microcosm-cc/bluemonday"
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/extension"
+	"github.com/yuin/goldmark/parser"
+	"github.com/yuin/goldmark/renderer/html"
 	"go.yarn.social/lextwt"
 	"go.yarn.social/types"
 )
@@ -50,21 +52,6 @@ func CustomTime(then time.Time) string {
 
 // FormatTwt formats a twt into a valid HTML snippet
 func FormatTwt(twt types.Twt) template.HTML {
-	extensions := parser.NoIntraEmphasis | parser.FencedCode |
-		parser.Autolink | parser.Strikethrough | parser.SpaceHeadings |
-		parser.NoEmptyLineBeforeBlock | parser.HardLineBreak
-
-	mdParser := parser.NewWithExtensions(extensions)
-
-	htmlFlags := html.Smartypants | html.SmartypantsDashes | html.SmartypantsLatexDashes
-
-	opts := html.RendererOptions{
-		Flags:     htmlFlags,
-		Generator: "",
-	}
-
-	renderer := html.NewRenderer(opts)
-
 	// copy alt to title if present.
 	if cp, ok := twt.(*lextwt.Twt); ok {
 		twt = cp.Clone()
@@ -81,7 +68,24 @@ func FormatTwt(twt types.Twt) template.HTML {
 	markdownInput := twt.FormatText(types.HTMLFmt, nil)
 
 	md := []byte(markdownInput)
-	maybeUnsafeHTML := markdown.ToHTML(md, mdParser, renderer)
+	var maybeUnsafeHTML bytes.Buffer
+	gm := goldmark.New(
+          goldmark.WithExtensions(
+			  extension.GFM,
+			  extension.Linkify,
+		  ),
+          goldmark.WithParserOptions(
+              parser.WithAutoHeadingID(),
+          ),
+          goldmark.WithRendererOptions(
+              html.WithHardWraps(),
+              html.WithXHTML(),
+			  html.WithUnsafe(),
+          ),
+      )
+	if err := gm.Convert(md, &maybeUnsafeHTML); err != nil {
+		panic(err)
+	}
 
 	p := bluemonday.StrictPolicy()
 	p.AllowStandardURLs()
@@ -97,7 +101,7 @@ func FormatTwt(twt types.Twt) template.HTML {
 	p.AllowAttrs("aria-label", "class", "data-target", "target").OnElements("a")
 	p.AllowAttrs("class", "data-target").OnElements("i", "lightbox")
 	p.AllowAttrs("alt", "title", "loading", "data-target", "data-tooltip").OnElements("a", "img")
-	html := p.SanitizeBytes(maybeUnsafeHTML)
+	html := p.SanitizeBytes(maybeUnsafeHTML.Bytes())
 
 	return template.HTML(fmt.Sprintf(`<p>%s</p>`, html))
 }
