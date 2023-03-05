@@ -120,7 +120,7 @@ func main() {
 	parseArgs()
 
 	if version {
-		fmt.Printf("twtxt2html version %s", yarn.FullVersion())
+		fmt.Printf("twtxt2html version %s\n", yarn.FullVersion())
 		os.Exit(0)
 	}
 
