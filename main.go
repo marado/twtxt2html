@@ -50,7 +50,7 @@ twtxt2html converts a twtxt feed to a static HTML page
 					{{ $twt.Created }}
 				  </time>
 				</a>
-				<span>&nbsp;({{ $twt.Created | time }})</span>
+				<span>&nbsp;{{ $twt.Created | time }}</span>
 				<a class="u-search" href="https://search.twtxt.net/twt/{{ $twt.Hash }}">(search)</a>
 			  </div>
 			</div>
@@ -65,17 +65,19 @@ twtxt2html converts a twtxt feed to a static HTML page
 )
 
 var (
-	debug   bool
-	version bool
+	debug     bool
+	version   bool
 
-	limit   int
-	reverse bool
-	title   string
+	limit     int
+	reverse   bool
+	title     string
+	noreldate bool
 )
 
 type context struct {
-	Title string
-	Twts  types.Twts
+	Title     string
+	Twts      types.Twts
+	NoRelDate bool
 }
 
 func init() {
@@ -92,6 +94,7 @@ func init() {
 	flag.IntVarP(&limit, "limit", "l", -1, "limit number ot twts (default all)")
 	flag.BoolVarP(&reverse, "reverse", "r", false, "reverse the order of twts (oldest first)")
 	flag.StringVarP(&title, "title", "t", "Twtxt Feed", "title of generated page")
+	flag.BoolVarP(&noreldate, "noreldate", "n", false, "do now show twt relative dates")
 }
 
 func flagNameFromEnvironmentName(s string) string {
@@ -190,7 +193,11 @@ func main() {
 func render(tpl string, ctx context) (string, error) {
 	funcMap := sprig.FuncMap()
 
-	funcMap["time"] = CustomTime
+	if ctx.NoRelDate {
+		funcMap["time"] = NoCustomTime
+	} else {
+		funcMap["time"] = CustomTime
+	}
 	funcMap["formatTwt"] = FormatTwt
 
 	t := template.Must(template.New("tpl").Funcs(funcMap).Parse(tpl))
@@ -228,8 +235,9 @@ func twtxt2HTML(r io.Reader) {
 	}
 
 	ctx := context{
-		Title: title,
-		Twts:  twts,
+		Title:     title,
+		Twts:      twts,
+		NoRelDate: noreldate,
 	}
 
 	html, err := render(htmlTemplate, ctx)

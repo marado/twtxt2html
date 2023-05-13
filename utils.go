@@ -47,7 +47,13 @@ func CustomRelTime(a, b time.Time, albl, blbl string) string {
 // CustomTime is a template function that returns a relative time representation of
 // a timestamp compared to now in a short human readable form.
 func CustomTime(then time.Time) string {
-	return CustomRelTime(then, time.Now(), "ago", "from now")
+	return "(" + CustomRelTime(then, time.Now(), "ago", "from now") + ")"
+}
+
+// This is function is called in replacement to CustomTime, when we do not wish
+// to display any relative times at all.
+func NoCustomTime(then time.Time) string {
+      return ""
 }
 
 // FormatTwt formats a twt into a valid HTML snippet
