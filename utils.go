@@ -79,6 +79,7 @@ func FormatTwt(twt types.Twt) template.HTML {
 		goldmark.WithExtensions(
 			extension.GFM,
 			extension.Linkify,
+			extension.Typographer,
 		),
 		goldmark.WithParserOptions(
 			parser.WithAutoHeadingID(),
