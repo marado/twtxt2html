@@ -1,8 +1,10 @@
 package main
+
 import (
-	"testing"
-	"fmt"
 	"bytes"
+	"fmt"
+	"testing"
+
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
@@ -40,7 +42,7 @@ func TestBrackets(t *testing.T) {
 	var htmlResult = fmt.Sprintf(`%s`, htmlr.String())
 
 	if len(expectedOutput) > len(htmlResult) {
-		t.Errorf("test failed, the output (%s) is shorter than what was expected (%s).", htmlResult, expectedOutput);
+		t.Errorf("test failed, the output (%s) is shorter than what was expected (%s).", htmlResult, expectedOutput)
 	} else if htmlResult[0:len(expectedOutput)]+"" != expectedOutput {
 		print("DEBUG: %s\n", htmlResult)
 		t.Errorf("test failed, the output is not what was expected ('%s'), but instead '%s'", expectedOutput, htmlResult[0:len(expectedOutput)]+"")
