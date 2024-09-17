@@ -145,6 +145,16 @@ func main() {
 
 	t := htmlTemplate
 
+	// if tmplFile is set, read the file and use its content as the template
+	if tmplFIle != "" {
+		b, err := os.ReadFile(tmplFIle)
+		if err != nil {
+			log.WithError(err).Error("error reading template file")
+			os.Exit(2)
+		}
+		t = string(b)
+	}
+
 	url, err := url.Parse(flag.Arg(0))
 	if err != nil {
 		log.WithError(err).Error("error parsing url")
