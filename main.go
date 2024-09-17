@@ -96,7 +96,7 @@ func init() {
 	flag.BoolVarP(&reverse, "reverse", "r", false, "reverse the order of twts (oldest first)")
 	flag.StringVarP(&title, "title", "t", "Twtxt Feed", "title of generated page")
 	flag.StringVarP(&tmplFIle, "template", "T", "", "path to template file")
-	flag.BoolVarP(&noreldate, "noreldate", "n", false, "do now show twt relative dates")
+	flag.BoolVarP(&noreldate, "noreldate", "n", false, "disable relative timestamps")
 }
 
 func flagNameFromEnvironmentName(s string) string {
