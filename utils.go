@@ -50,10 +50,10 @@ func CustomTime(then time.Time) string {
 	return "(" + CustomRelTime(then, time.Now(), "ago", "from now") + ")"
 }
 
-// This is function is called in replacement to CustomTime, when we do not wish
-// to display any relative times at all.
-func NoCustomTime(then time.Time) string {
-      return ""
+// NoCustomTime is a template function that always returns an empty string,
+// effectively disabling the timestamp display.
+func NoCustomTime(_ time.Time) string {
+	return ""
 }
 
 // FormatTwt formats a twt into a valid HTML snippet
@@ -76,19 +76,19 @@ func FormatTwt(twt types.Twt) template.HTML {
 	md := []byte(markdownInput)
 	var maybeUnsafeHTML bytes.Buffer
 	gm := goldmark.New(
-          goldmark.WithExtensions(
-			  extension.GFM,
-			  extension.Linkify,
-		  ),
-          goldmark.WithParserOptions(
-              parser.WithAutoHeadingID(),
-          ),
-          goldmark.WithRendererOptions(
-              html.WithHardWraps(),
-              html.WithXHTML(),
-			  html.WithUnsafe(),
-          ),
-      )
+		goldmark.WithExtensions(
+			extension.GFM,
+			extension.Linkify,
+		),
+		goldmark.WithParserOptions(
+			parser.WithAutoHeadingID(),
+		),
+		goldmark.WithRendererOptions(
+			html.WithHardWraps(),
+			html.WithXHTML(),
+			html.WithUnsafe(),
+		),
+	)
 	if err := gm.Convert(md, &maybeUnsafeHTML); err != nil {
 		panic(err)
 	}

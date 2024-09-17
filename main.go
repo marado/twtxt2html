@@ -65,12 +65,13 @@ twtxt2html converts a twtxt feed to a static HTML page
 )
 
 var (
-	debug     bool
-	version   bool
+	debug   bool
+	version bool
 
 	limit     int
 	reverse   bool
 	title     string
+	tmplFIle  string
 	noreldate bool
 )
 
@@ -94,6 +95,7 @@ func init() {
 	flag.IntVarP(&limit, "limit", "l", -1, "limit number ot twts (default all)")
 	flag.BoolVarP(&reverse, "reverse", "r", false, "reverse the order of twts (oldest first)")
 	flag.StringVarP(&title, "title", "t", "Twtxt Feed", "title of generated page")
+	flag.StringVarP(&tmplFIle, "template", "T", "", "path to template file")
 	flag.BoolVarP(&noreldate, "noreldate", "n", false, "do now show twt relative dates")
 }
 
@@ -141,6 +143,8 @@ func main() {
 		os.Exit(1)
 	}
 
+	t := htmlTemplate
+
 	url, err := url.Parse(flag.Arg(0))
 	if err != nil {
 		log.WithError(err).Error("error parsing url")
@@ -156,7 +160,7 @@ func main() {
 		}
 		defer f.Close()
 
-		twtxt2HTML(f)
+		twtxt2HTML(t, f)
 	case "http", "https":
 		f, err := http.Get(url.String())
 		if err != nil {
@@ -165,7 +169,7 @@ func main() {
 		}
 		defer f.Body.Close()
 
-		twtxt2HTML(f.Body)
+		twtxt2HTML(t, f.Body)
 	case "gopher":
 		res, err := gopher.Get(url.String())
 		if err != nil {
@@ -174,7 +178,7 @@ func main() {
 		}
 		defer res.Body.Close()
 
-		twtxt2HTML(res.Body)
+		twtxt2HTML(t, res.Body)
 	case "gemini":
 		res, err := gemini.Fetch(url.String())
 		if err != nil {
@@ -183,7 +187,7 @@ func main() {
 		}
 		defer res.Body.Close()
 
-		twtxt2HTML(res.Body)
+		twtxt2HTML(t, res.Body)
 	default:
 		log.WithError(err).Errorf("unsupported url scheme: %s", url.Scheme)
 		os.Exit(2)
@@ -211,7 +215,7 @@ func render(tpl string, ctx context) (string, error) {
 	return buf.String(), nil
 }
 
-func twtxt2HTML(r io.Reader) {
+func twtxt2HTML(t string, r io.Reader) {
 	twter := types.NilTwt.Twter()
 	tf, err := lextwt.ParseFile(r, &twter)
 	if err != nil {
@@ -240,7 +244,7 @@ func twtxt2HTML(r io.Reader) {
 		NoRelDate: noreldate,
 	}
 
-	html, err := render(htmlTemplate, ctx)
+	html, err := render(t, ctx)
 	if err != nil {
 		log.WithError(err).Errorf("error rendering feed")
 		os.Exit(2)
